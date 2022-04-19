@@ -44,7 +44,9 @@ public:
 			balance = 0;
 		}
 	}
-	Account(const Account &copy): ID(id), balance(balance) {
+	Account(const Account &copy) {
+		ID = copy.getID();
+		balance = copy.getBalance();
 		this->name = new char[strlen(copy.name) + 1];
 		strcpy(this->name, copy.name);
 	}
