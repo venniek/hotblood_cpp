@@ -163,7 +163,6 @@ int main() {
 			break;
 		case 5:
 			cout << "프로그램을 종료합니다." << endl;
-			system("leaks a.out");
 			return 0;
 		}
 		cout << endl;
