@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 using namespace std;
 
 class Account {
@@ -7,24 +8,60 @@ private:
 	int balance;
 	char *name;
 public:
-	int getID() const;
-	int getBalance() const;
-	char *getName() const;
-	void setID(int id);
-	void setBalance(int balance);
-	void setName(char *name);
+	int getID() const {
+		return ID;
+	}
+	int getBalance() const {
+		return balance;
+	}
+	char *getName() const {
+		return name;
+	}
+	void setID(int id) {
+		this->ID = id;
+	}
+	void setBalance(int balance) {
+		this->balance = balance;
+	}
+	void setName(char *name) {
+		strcpy(this->name, name);
+	}
 
-	void depositMoney(int add);
-	void withdrawMoney(int withdraw);
-	void showInfo() const;
+	void depositMoney(int add) {
+		balance += add;
+		cout << "입금이 끝났습니다. 잔액은 " << balance << "원입니다." << endl;
+	}
+	void withdrawMoney(int withdraw) {
+		if (balance < withdraw)
+			cout << "잔액이 부족합니다." << endl;
+		else {
+			balance -= withdraw;
+			cout << "출금이 끝났습니다. 잔액은 " << balance << "원입니다." << endl;
+		}
+	}
+	void showInfo() const {
+		cout << "계좌ID: " << ID << endl;
+		cout << "이름: " << name << endl;
+		cout << "잔액: " << balance << endl;
+	}
 
-	Account(int id, int balace, char *name) : ID(id), balance(balance) { 
-		
-	};
+	Account() {
+		this->name = new char[100];
+	}
+	Account(int id, int balance, char *name) : ID(id), balance(balance) {
+		this->name = new char[strlen(name) + 1];
+		strcpy(this->name, name);
+		if (balance < 0) {
+			cout << "잔액이 음수일 수 없습니다. 0으로 초기화합니다." << endl;
+			balance = 0;
+		}
+	}
+	~Account() {
+		delete name;
+	}
+};
 
-}
-
-t_info infos[100];
+Account *infos[100];
 int cnt = 0;
 
 void showMenu() {
@@ -38,7 +75,7 @@ void showMenu() {
 
 void makeNewAccount() {
 	int account;
-	string name;
+	char *name = new char[100];
 	int balance;
 
 	cout << "[계좌개설]" << endl;
@@ -48,10 +85,10 @@ void makeNewAccount() {
 	cin >> name;
 	cout << "입금액: ";
 	cin >> balance;
-	infos[cnt].account = account;
-	infos[cnt].name = name;
-	infos[cnt].balance = balance;
+
+	infos[cnt] = new Account(account, balance, name);
 	cnt++;
+	delete[] name;
 }
 
 void deposit() {
@@ -64,9 +101,8 @@ void deposit() {
 	cout << "입금액: ";
 	cin >> input;
 	for (int i = 0; i < cnt; i++) {
-		if (account == infos[i].account) {
-			infos[i].balance += input;
-			cout << "입금완료" << endl;
+		if (account == infos[i]->getID()) {
+			infos[i]->depositMoney(input);
 			return;
 		}
 	}
@@ -83,14 +119,8 @@ void withdraw() {
 	cout << "출금액: ";
 	cin >> output;
 	for (int i = 0; i < cnt; i++) {
-		if (account == infos[i].account) {
-			if (infos[i].balance >= output) {
-				infos[i].balance -= output;
-				cout << "출금완료" << endl;
-			}
-			else {
-				cout << "잔액이 부족합니다." << endl;
-			}
+		if (account == infos[i]->getID()) {
+			infos[i]->withdrawMoney(output);
 			return;
 		}
 	}
@@ -98,13 +128,13 @@ void withdraw() {
 }
 
 void print() {
+	cout << "==Accounts Info===========" << endl << endl;
 	for (int i = 0; i < cnt; i++) {
-		cout << "계좌ID: " << infos[i].account << endl;
-		cout << "이름: " << infos[i].name << endl;
-		cout << "잔액: " << infos[i].balance << endl << endl;
+		infos[i]->showInfo();
+		cout << endl;
 	}
+	cout << "==========================" << endl;
 }
-
 
 int main() {
 	int select;
@@ -129,6 +159,7 @@ int main() {
 			break;
 		case 5:
 			cout << "프로그램을 종료합니다." << endl;
+			system("leaks a.out");
 			return 0;
 		}
 		cout << endl;
